@@ -22,17 +22,36 @@ app.get('/', (req, res) => {
 app.get('/items', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
 
-  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-  client.connect(err => {
-    const collection = client.db("item").collection("all");
-
-    collection.find({}).toArray(function(err, result) {
-      if (err) throw err;
-      res.send(result);
-      client.close();
-    });
-  });
+  getItemData().then((data) => {
+    return data;
+  })
+  .then((data) => {
+    res.send(data);
+  })
 })
+
+async function getItemData() {
+  const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverApi: {
+      version: ServerApiVersion.v1,
+    },
+  });
+
+  try {
+    await client.connect();
+    const database = client.db('item');
+    const collection = database.collection('all');
+
+    const response = await collection.find({}).toArray();
+    
+    return response;
+  }
+  catch (e) {
+    console.error(e);
+  }
+}
 
 async function getAuthData() {
   const response = await axios.post(
