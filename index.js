@@ -29,6 +29,7 @@ app.get('/items', (req, res) => {
     collection.find({}).toArray(function(err, result) {
       if (err) throw err;
       res.send(result);
+      client.close();
     });
   });
 })
