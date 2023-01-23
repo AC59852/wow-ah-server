@@ -26,11 +26,10 @@ app.get('/items', (req, res) => {
   client.connect(err => {
     const collection = client.db("item").collection("all");
 
-    Promise.all([collection.find({}).toArray()]).then((data) => {
-      res.send(data);
-    }).then(() => {
-      client.close();
-    })
+    collection.find({}).toArray(function(err, result) {
+      if (err) throw err;
+      res.send(result);
+    });
   });
 })
 
