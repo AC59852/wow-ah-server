@@ -3,6 +3,9 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
+const uri = process.env.MONGO_URI;
 
 // const oauthRoute = 'https://oauth.battle.net/token';
 
@@ -14,6 +17,21 @@ app.get('/', (req, res) => {
   .then((data) => {
     res.send(data.data);
   })
+})
+
+app.get('/items', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+  client.connect(err => {
+    const collection = client.db("item").collection("all");
+
+    Promise.all([collection.find({}).toArray()]).then((data) => {
+      res.send(data);
+    }).then(() => {
+      client.close();
+    })
+  });
 })
 
 async function getAuthData() {
